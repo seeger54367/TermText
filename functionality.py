@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from twilio import twiml
 from twilio.rest import Client
+from datetime import datetime
 import curses
 
 #Twilio info
@@ -29,7 +30,8 @@ def setRecipient():
     toNumber = input("Recieving phone number: ")
 
 def setFromNumber(num):
-    fromNumber = unique_from_numbers[num];
+    global fromNumber
+    fromNumber = unique_from_numbers[num]
 
 def getFromNumber():
     return fromNumber
@@ -52,10 +54,11 @@ def unique(list1):
     unique_list = (list(list_set)) 
     for x in unique_list: 
         #print(x), 
-        if x in phoneBook:
-            unique_from_numbers.append(phoneBook[x])
-        else:    
-            unique_from_numbers.append(x)
+        #if x in phoneBook:
+        #    unique_from_numbers.append(phoneBook[x])
+        #else:    
+        #    unique_from_numbers.append(x)
+        unique_from_numbers.append(x)
 
 
 def getConvoNumbers():
@@ -64,45 +67,53 @@ def getConvoNumbers():
         recieved_from_numbers.append(sms.from_)
         recieved_from_numbers.append(sms.to)
     unique(recieved_from_numbers)
-    #for number in unique(recieved_from_numbers)
-    #for i in range(len(recieved_from_numbers)):
-    #    print(recieved_from_numbers[i])
 
 
 
 def getMessages():
     global contact_messages
     for sms in client.messages.list():
-        if (sms.to == toNumber) | (sms.from_ == toNumber):
+        if (sms.to == fromNumber) | (sms.from_ == fromNumber):
             sender = sms.from_
             target = sms.to
             message = sms.body
             timestamp = sms.date_sent
-            contact_messages.append((timestamp, sender, target, message))
+            contact_messages.append((timestamp.strftime("%m/%d/%Y, %H:%M:%S"), sender, target, message))
 
 def convoWindow(myscreen, selected_contact):
     convoWindow = curses.newwin(convoHeight, convoWidth, 1, contactWidth + 1)
-    convoWindow.clear()
+    #convoWindow.clear()
     convoWindow.border(0)
-    for idx, current_message in enumerate(contact_messages):
+    x = 0
+    y = 0
+    for idx, current_message in enumerate(reversed(contact_messages)):
         x = 1
         y = 1 + idx
-        sender = current_message[0]
-        target = current_message[1]
-        #timestamp = current_message[2]
+        if y >= convoHeight:
+            y = convoHeight - 1
+            convoWindow.clear()
+            convoWindow.refresh()
+        timestamp = current_message[0]
+        sender = current_message[1]
+        target = current_message[2]
         message = current_message[3]
-        #formated_message = " | "+sender+ ":" + message
-        convoWindow.addstr(y,x,message)
+        formated_message = timestamp +" | "+sender+ ":" + message
+        try:
+            convoWindow.addstr(y,x,formated_message)
+        except:
+            convoWindow.clear()
+            continue
     #contactHeader = unique_from_numbers[selected_contact]
     contactHeader = fromNumber
     convoWindow.addstr(0,0,contactHeader)
     myscreen.refresh()
     convoWindow.refresh()
 
-def messageWindow(myscreen):
+def messageWindow(myscreen, selected_contact):
     messageWindow = curses.newwin(messageHeight, messageWidth, convoHeight +1, contactWidth + 1)
     messageWindow.border(0)
-    messageWindow.addstr(1,1, "Plese type your message")
+    messageContent = "Send a message to " + str(selected_contact)
+    messageWindow.addstr(1,1, messageContent)
     myscreen.refresh()
     messageWindow.refresh()
 
@@ -117,6 +128,8 @@ def contactsWindow(myscreen, selected_contact):
     for idx, number in enumerate(unique_from_numbers):
         x = contactWidth//2 - len(number)//2
         y = 1 + idx
+        if number in phoneBook:
+            number = phoneBook[number]
         if idx == selected_contact:
             contactsWindow.attron(curses.color_pair(1))
             contactsWindow.addstr(y,x,number)
@@ -147,7 +160,7 @@ def mainDisplay(myscreen):
     myscreen.border(0)
     current_contact_idx = 0
     contactsWindow(myscreen, current_contact_idx)
-    messageWindow(myscreen)
+    messageWindow(myscreen, current_contact_idx)
     convoWindow(myscreen, current_contact_idx)
     #Contacts Window
     #contactsWindow.addstr(1,1,"Test")
@@ -162,16 +175,15 @@ def mainDisplay(myscreen):
             current_contact_idx -=1
             setFromNumber(current_contact_idx)
             getMessages()
-        elif key == curses.KEY_DOWN and current_contact_idx < len(unique_from_numbers):
+        elif key == curses.KEY_DOWN and current_contact_idx < len(unique_from_numbers)-1:
             current_contact_idx +=1
             setFromNumber(current_contact_idx)
             getMessages()
 
-        contactsWindow(myscreen, current_contact_idx)
-        messageWindow(myscreen)
-        convoWindow(myscreen, current_contact_idx)
         myscreen.refresh()
-        curses.napms(2000)
+        convoWindow(myscreen, current_contact_idx)
+        contactsWindow(myscreen, current_contact_idx)
+        messageWindow(myscreen, current_contact_idx)
 
     
 def callDisplay():
@@ -179,17 +191,8 @@ def callDisplay():
 
 
 def main():
-    #print(getConvoNumbers())
+    getMessages()
     getConvoNumbers()
-    #callDisplay()
-    #for idx, number in enumerate(unique_from_numbers):
-    #        print(unique_from_numbers[idx])
-    current_contact_idx = 0
-    print(current_contact_idx)
-    print(getFromNumber())
-    current_contact_idx = 1
-    print(current_contact_idx)
-    setFromNumber(current_contact_idx)
-    print(getFromNumber())
+    callDisplay()
 
 main()
