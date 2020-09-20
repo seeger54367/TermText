@@ -8,8 +8,11 @@ This project provides a terminal user interface for the popular Twilio messaging
 
 ### Application Features:
 - Terminal User Interface that populates a list with the user's Twilio SMS message conversations.
-- Ability for users to view their Twilio conversations, and send messages to their Twilio contacts in the system.
+- Users can send, receive, and view their Twilio SMS messages.
+- Uses Twilio's API to read in and send SMS conversations.
+- Users can use this application directly though their terminal, no Graphial User Interface required!
 
-### Technologyes/Frameworks Used:
+### Technologies/Frameworks Used:
 - Python 3
-- NCurses Library for displaying information for user interaction
+- Twilio REST API (sending, reading messages & contacts)
+- Curses Library for displaying information for user interaction
