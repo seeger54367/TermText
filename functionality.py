@@ -158,7 +158,7 @@ def convoWindow(myscreen, selected_contact):
         contactHeader = phoneBook[toNumber]
     else:
         contactHeader = toNumber
-    convoWindow.addstr(0,0,contactHeader)
+    convoWindow.addstr(0,convoWidth//2-len(contactHeader),contactHeader)
     myscreen.refresh()
     convoWindow.refresh()
 
@@ -203,6 +203,7 @@ def mainDisplay(myscreen):
     global contactHeight
     global contactWidth
     global current_contact_index
+    curses.use_default_colors()
     editWidth = curses.COLS - 5
     editHeight = curses.LINES - 5
     contactHeight = curses.LINES - 2
@@ -213,6 +214,8 @@ def mainDisplay(myscreen):
     convoWidth = curses.COLS - contactWidth - 2
     curses.curs_set(0)
     curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_GREEN)
+    curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
+
     myscreen.keypad(True)
     myscreen.border(0)
     current_contact_idx = 0
