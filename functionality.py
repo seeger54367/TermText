@@ -165,7 +165,7 @@ def convoWindow(myscreen, selected_contact):
 def messageWindow(myscreen, selected_contact):
     messageWindow = curses.newwin(messageHeight, messageWidth, convoHeight +1, contactWidth + 1)
     messageWindow.border(0)
-    messageContent = "Select next contact 'J' or DOWN. Select Previous Contact 'K' or UP. Send message to select contact ENTER. quit 'q'."
+    messageContent = "Select next contact 'J' or DOWN. Select Previous Contact 'K' or UP. Send message to select contact ENTER. quit 'q'. Add contact 'a'."
     messageWindow.addstr(1,1, messageContent)
     myscreen.refresh()
     messageWindow.refresh()
@@ -235,6 +235,8 @@ def mainDisplay(myscreen):
             rectangle(myscreen, 1,0, 1+editHeight+1, 1+editWidth+1)
             myscreen.refresh()
             composeMessage(myscreen)
+            myscreen.clear()
+            myscreen.refresh()
 
         if key == ord('a'):
             #Add new number
@@ -254,6 +256,8 @@ def mainDisplay(myscreen):
             myscreen.refresh()
             composeMessage(myscreen)
             getConvoNumbers()
+            myscreen.clear()
+            myscreen.refresh()
         elif key == curses.KEY_UP and current_contact_idx > 0:
             current_contact_idx -=1
             setToNumber(current_contact_idx)
