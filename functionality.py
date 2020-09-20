@@ -27,6 +27,8 @@ messageWidth = 0
 messageHeight = 0
 current_contact_idx = 0
 messageString = ""
+editHeight = 0
+editWidth = 0
 
 client = Client(account_sid, auth_token)
 
@@ -44,7 +46,6 @@ def setToNumber(num):
     global toNumber
     toNumber = unique_from_numbers[num]
 
-def newContactMessage
 
 def sendMessage(messageBody):
     message = client.messages.create(
@@ -69,6 +70,8 @@ def unique(list1):
 
 def getConvoNumbers():
     global recieved_from_numbers
+    recieved_from_number = []
+    unique_from_number = []
     for sms in client.messages.list():
         recieved_from_numbers.append(sms.from_)
         recieved_from_numbers.append(sms.to)
@@ -86,16 +89,44 @@ def getMessages():
             timestamp = sms.date_sent
             contact_messages.append((timestamp.strftime("%m/%d/%Y, %H:%M:%S"), sender, target, message))
 
-def composeMessage(myscreen, selected_contact):
-    messageWindow = curses.newwin(messageHeight, messageWidth, convoHeight +1, contactWidth + 1)
-    messageWindow.addstr(0, 0, "Enter IM message: (hit Ctrl-G to send)")
-    rectangle(myscreen, messageHeight+1, messageWidth+ 1, convoHeight +1, contactWidth + 1)
-    #messageContent = "Send a message to " + str(selected_contact)
-    message_box = Textbox(messageWindow)
-    new_message = message_box.gather()
+def newContactMessage(myscreen):
+    global toNumber
+    global editHeight
+    global editWidth
+    #Send new message to new number
+    myscreen.clear()
+    myscreen.addstr(0, 0, "Enter newPhoneNumber: EX. +1XXXXXXXXXX (hit Ctrl-G to draft message)")
 
-    myscreen.getkey()
-    #messageWindow.addstr(1,1, messageContent)
+    addNumberScreen = curses.newwin(editHeight , editWidth, 2,1)
+    rectangle(myscreen, 1,0, 1+editHeight+1, 1+editWidth+1)
+    #myscreen.refresh()
+    newNumBox = Textbox(addNumberScreen)
+
+    ## Let the user edit until Ctrl-G is struck.
+    newNumBox.edit()
+
+    ## Get resulting contents
+    newNumber = newNumBox.gather()
+    toNumber = newNumber
+
+def composeMessage(myscreen):
+    global editHeight
+    global editWidth
+    myscreen.clear()
+    myscreen.addstr(0, 0, "Enter IM message: (hit Ctrl-G to send)")
+
+    editwin = curses.newwin(editHeight , editWidth, 2,1)
+    rectangle(myscreen, 1,0, 1+editHeight+1, 1+editWidth+1)
+    #myscreen.refresh()
+
+    box = Textbox(editwin)
+
+    # Let the user edit until Ctrl-G is struck.
+    box.edit()
+
+    # Get resulting contents
+    message = box.gather()
+    sendMessage(message)
 
 def convoWindow(myscreen, selected_contact):
     convoWindow = curses.newwin(convoHeight, convoWidth, 1, contactWidth + 1)
@@ -134,8 +165,8 @@ def convoWindow(myscreen, selected_contact):
 def messageWindow(myscreen, selected_contact):
     messageWindow = curses.newwin(messageHeight, messageWidth, convoHeight +1, contactWidth + 1)
     messageWindow.border(0)
-    messageContent = "Send a message to " + unique_from_numbers[selected_contact]
-    #messageWindow.addstr(1,1, messageContent)
+    messageContent = "Select next contact 'J' or DOWN. Select Previous Contact 'K' or UP. Send message to select contact ENTER. quit 'q'."
+    messageWindow.addstr(1,1, messageContent)
     myscreen.refresh()
     messageWindow.refresh()
 
@@ -193,26 +224,33 @@ def mainDisplay(myscreen):
         key = myscreen.getch()
         myscreen.clear()
         if key == curses.KEY_ENTER or key in [10,13]:
+            #Send new message
             FromNumber=myNumber
             setToNumber(current_contact_idx)
             myscreen.addstr(0, 0, "Enter IM message: (hit Ctrl-G to send)")
-
             editwin = curses.newwin(editHeight , editWidth, 2,1)
             rectangle(myscreen, 1,0, 1+editHeight+1, 1+editWidth+1)
             myscreen.refresh()
+            composeMessage(myscreen)
 
-            box = Textbox(editwin)
+        if key == ord('a'):
+            #Add new number
+            FromNumber=myNumber
+            myscreen.addstr(0, 0, "Enter newPhoneNumber: EX. +1XXXXXXXXXX (hit Ctrl-G to draft message)")
+            addNumberScreen = curses.newwin(editHeight , editWidth, 2,1)
+            rectangle(myscreen, 1,0, 1+editHeight+1, 1+editWidth+1)
+            myscreen.refresh()
+            newContactMessage(myscreen)
 
-            # Let the user edit until Ctrl-G is struck.
-            box.edit()
-
-            # Get resulting contents
-            message = box.gather()
-            sendMessage(message)
-
-            #myscreen.getkey()
+            #Send new message to new number
             myscreen.clear()
             myscreen.refresh()
+            myscreen.addstr(0, 0, "Enter IM message: (hit Ctrl-G to send)")
+            editwin = curses.newwin(editHeight , editWidth, 2,1)
+            rectangle(myscreen, 1,0, 1+editHeight+1, 1+editWidth+1)
+            myscreen.refresh()
+            composeMessage(myscreen)
+            getConvoNumbers()
         elif key == curses.KEY_UP and current_contact_idx > 0:
             current_contact_idx -=1
             setToNumber(current_contact_idx)
@@ -242,7 +280,7 @@ def callDisplay():
 
 def main():
     getConvoNumbers()
-    setFromNumber(current_contact_idx)
+    setToNumber(current_contact_idx)
     getMessages()
     callDisplay()
 
