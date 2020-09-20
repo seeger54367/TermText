@@ -9,6 +9,7 @@ This project provides a terminal user interface for the popular Twilio messaging
 ### Application Features:
 - Terminal User Interface that populates a list with the user's Twilio SMS message conversations.
 - Users can send, receive, and view their Twilio SMS messages.
+- Users can add a new phone number to send a message to.
 - Uses Twilio's API to read in and send SMS conversations.
 - Users can use this application directly though their terminal, no Graphial User Interface required!
 
