@@ -1,6 +1,6 @@
-# GrizzHacks5
+# TermText
 
-## Twilio Terminal Messaging Client
+## A terminal messaging application built for GrizzHacks5.
 
 ### Authors: Austin Daniell, Sal Trupiano
 
