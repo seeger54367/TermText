@@ -3,8 +3,7 @@
 ## A terminal messaging application
 ### Authors: Austin Daniell, Sal Trupiano
 
-This project provides a terminal user interface for the popular Twilio messaging service. This project was created for GrizzHacks5 at Oakland University.
-
+This project provides a terminal user interface for the popular Twilio messaging service. 
 ### Application Features:
 - Terminal User Interface that populates a list with the user's Twilio SMS message conversations.
 - Users can send, receive, and view their Twilio SMS messages.
