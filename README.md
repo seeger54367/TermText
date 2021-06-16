@@ -1,7 +1,6 @@
 # TermText
 
 ## A terminal messaging application
-### Authors: Austin Daniell, Sal Trupiano
 
 This project provides a terminal user interface for the popular Twilio messaging service. 
 ### Application Features:
